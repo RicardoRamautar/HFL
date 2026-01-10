@@ -1,5 +1,5 @@
-from utils import save_state_dict, average_weights
-from client import Client
+from hfl.aggregation import save_state_dict, average_weights
+from hfl.client import Client
 
 import torch
 

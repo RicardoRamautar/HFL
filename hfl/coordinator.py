@@ -1,5 +1,5 @@
-from utils import average_weights, save_state_dict
-from edge import Edge
+from hfl.aggregation import average_weights, save_state_dict
+from hfl.edge import Edge
 
 from typing import Optional, Union
 from pathlib import Path

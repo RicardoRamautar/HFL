@@ -3,17 +3,11 @@ import pickle
 from pathlib import Path
 from collections import defaultdict
 
-# data_root = Path(
-#     "/tudelft.net/staff-umbrella/IntelligentVehiclesPublicDatasets/nuscenes/v1.0-trainval"
-# )
 output_file = Path("./data_distribution.json")
 pth = '/home/rdr/Documents/master_thesis/data/nuscenes/nuscenes_infos_train.pkl'
 
 
 # # Contains info of each scene
-# scene_file = data_root / "scene.json"
-# # Contains info of each data collection run
-# log_file = data_root / "log.json"
 scene_file = Path('./scene.json')
 log_file = Path('./log.json')
 
