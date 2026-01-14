@@ -7,10 +7,10 @@ def main():
     print_log(f"Constructing coordinator...", logger='root' )
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_001",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_002",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_voxel0075_cbgs.py",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
-        init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_5/epoch_10.pth",
+        init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_7/best_pts_bbox_NuScenes/mAP_epoch_2.pth",
         num_local_rounds = 1,
         num_edge_rounds = 1,
         num_global_rounds = 1,
