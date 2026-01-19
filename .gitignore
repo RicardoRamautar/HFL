@@ -1,3 +1,5 @@
 **/__pycache__/*
 **/*.pth
 experiments/exp_002/*
+experiments/exp_003/*
+experiments/exp_004/*

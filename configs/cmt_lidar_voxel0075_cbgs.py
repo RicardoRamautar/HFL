@@ -339,11 +339,12 @@ optimizer_config = dict(
     loss_scale='dynamic',
     grad_clip=dict(max_norm=35, norm_type=2),
     custom_fp16=dict(pts_voxel_encoder=False, pts_middle_encoder=False, pts_bbox_head=False))
-lr_config = dict(
-    policy='cyclic',
-    target_ratio=(6, 0.0001),
-    cyclic_times=1,
-    step_ratio_up=0.4)
+# lr_config = dict(
+#     policy='cyclic',
+#     target_ratio=(6, 0.0001),
+#     cyclic_times=1,
+#     step_ratio_up=0.4)
+lr_config = None
 momentum_config = dict(
     policy='cyclic',
     target_ratio=(0.8947368421052632, 1),
@@ -362,7 +363,9 @@ log_config = dict(
     interval=5,
     # hooks=[dict(type='TextLoggerHook'),
     #        dict(type='TensorboardLoggerHook')])
-    hooks=[dict(type='TextLoggerHook')])
+    hooks=[dict(type='TextLoggerHook')]
+    # hooks = []
+)
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 # work_dir='/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_4/'
