@@ -34,6 +34,7 @@ class Coordinator():
                 base_cfg_path: str,
                 manifest_path: str,
                 init_ckpt_path: str,
+                lr_cfg: dict,
                 num_local_rounds: int = 1,
                 num_edge_rounds: int = 1,
                 num_global_rounds: int = 1,
@@ -75,7 +76,8 @@ class Coordinator():
                 num_rounds = num_edge_rounds,
                 num_local_rounds = num_local_rounds,
                 token_to_name_path = token_to_name_path,
-                seed = seed
+                seed = seed,
+                lr_cfg = lr_cfg
             )
             self.edges.append(edge)
 

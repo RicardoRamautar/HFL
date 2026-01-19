@@ -1,5 +1,6 @@
 from hfl.aggregation import save_state_dict, average_weights
 from hfl.client import Client
+from hfl.lr import LRScheduler
 
 import torch
 
@@ -32,6 +33,7 @@ class Edge():
                  name: str,
                  clients: dict,
                  base_cfg: Config,
+                 lr_cfg: dict,
                  num_rounds: int = 1,
                  num_local_rounds: int = 1,
                  token_to_name_path: Optional[str] = None,
@@ -46,14 +48,16 @@ class Edge():
         self.base_cfg = base_cfg
         self.num_rounds = num_rounds
 
+        self.round = 0
+        self.lr_scheduler = LRScheduler(**lr_cfg)
+
         # Create clients
         self.clients = []
         for client_name, client_info in clients.items():
-            print_log(f"Instantiating client {client_name}", logger='root' )
+            print_log(f"Instantiating client {client_name}", logger='root')
             client = Client(
                 name = client_name,
                 scenes = client_info['scenes'],
-                # base_cfg = base_cfg,
                 num_epochs = num_local_rounds,
                 token_to_name_path = token_to_name_path,
                 seed = seed
@@ -65,12 +69,15 @@ class Edge():
         weight_paths = []
         sample_counts = []
 
+        lr = self.lr_scheduler.lr_at(self.round)
+        print_log(f"Using learning rate: {lr}", logger='root' )
+
         for client in self.clients[:3]:
             client_root = edge_root / str(client.name)
             client_root.mkdir(parents=True, exist_ok=True)
 
             try:
-                save_path, num_samples = client.train(self.base_cfg, load_path, client_root)
+                save_path, num_samples = client.train(self.base_cfg, load_path, client_root, lr)
             finally:
                 # Free Python objects and cached GPU memory in between clients
                 gc.collect()
@@ -80,6 +87,8 @@ class Edge():
 
             weight_paths.append(save_path)
             sample_counts.append(num_samples)
+
+        self.round += 1
 
         return weight_paths, sample_counts
 
