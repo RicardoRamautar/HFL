@@ -42,6 +42,7 @@ class Client():
         self.token_to_name_path = token_to_name_path
         self.seed = seed
         self.num_samples = 0
+        self.total_rounds = 0
 
 
     def _build_client_cfg(self, 
@@ -88,7 +89,11 @@ class Client():
 
         cfg.lr_config = None
         cfg.momentum_config = None
-        cfg.optimizer.lr = lr
+        # cfg.optimizer.lr = lr
+        cfg.custom_hooks = {
+            'type':'PerEpochLr',
+            'epoch_lrs':lr
+        }
 
         return cfg
 
@@ -223,7 +228,8 @@ class Client():
               base_cfg: Config,
               load_path: Union[str, Path], 
               work_root: Path,
-              lr: float):
+            #   lr: float
+              lr:dict):
         """ Train model on client dataset.
 
         Args:

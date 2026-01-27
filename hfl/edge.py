@@ -47,6 +47,7 @@ class Edge():
         self.name = name
         self.base_cfg = base_cfg
         self.num_rounds = num_rounds
+        self.num_local_rounds = num_local_rounds
 
         self.round = 0
         self.lr_scheduler = LRScheduler(**lr_cfg)
@@ -58,7 +59,7 @@ class Edge():
             client = Client(
                 name = client_name,
                 scenes = client_info['scenes'],
-                num_epochs = num_local_rounds,
+                num_epochs = self.num_local_rounds,
                 token_to_name_path = token_to_name_path,
                 seed = seed
             )
@@ -69,10 +70,11 @@ class Edge():
         weight_paths = []
         sample_counts = []
 
-        lr = self.lr_scheduler.lr_at(self.round)
+        # lr = self.lr_scheduler.lr_at(self.round)
+        lr = {i: self.lr_scheduler.lr_at(i) for i in range(self.round, self.round+self.num_local_rounds)}
         print_log(f"Using learning rate: {lr}", logger='root' )
 
-        for client in self.clients[:3]:
+        for client in self.clients[:2]:
             client_root = edge_root / str(client.name)
             client_root.mkdir(parents=True, exist_ok=True)
 
