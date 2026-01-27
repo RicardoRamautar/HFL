@@ -50,7 +50,7 @@ class Edge():
         self.num_local_rounds = num_local_rounds
 
         self.round = 0
-        self.lr_scheduler = LRScheduler(**lr_cfg)
+        # self.lr_scheduler = LRScheduler(**lr_cfg)
 
         # Create clients
         self.clients = []
@@ -59,6 +59,7 @@ class Edge():
             client = Client(
                 name = client_name,
                 scenes = client_info['scenes'],
+                lr_cfg = lr_cfg,
                 num_epochs = self.num_local_rounds,
                 token_to_name_path = token_to_name_path,
                 seed = seed
@@ -71,15 +72,16 @@ class Edge():
         sample_counts = []
 
         # lr = self.lr_scheduler.lr_at(self.round)
-        lr = {i: self.lr_scheduler.lr_at(i) for i in range(self.round, self.round+self.num_local_rounds)}
-        print_log(f"Using learning rate: {lr}", logger='root' )
+        # lr = {i: self.lr_scheduler.lr_at(i) for i in range(self.round, self.round+self.num_local_rounds)}
+        # print_log(f"Using learning rate: {lr}", logger='root' )
 
         for client in self.clients[:2]:
             client_root = edge_root / str(client.name)
             client_root.mkdir(parents=True, exist_ok=True)
 
             try:
-                save_path, num_samples = client.train(self.base_cfg, load_path, client_root, lr)
+                # save_path, num_samples = client.train(self.base_cfg, load_path, client_root, lr)
+                save_path, num_samples = client.train(self.base_cfg, load_path, client_root)
             finally:
                 # Free Python objects and cached GPU memory in between clients
                 gc.collect()

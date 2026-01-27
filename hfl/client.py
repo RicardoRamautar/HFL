@@ -1,15 +1,16 @@
+from hfl.lr import LRScheduler
+
 from typing import List, Optional, Union
 from pathlib import Path
 import copy
 
+from mmcv import print_log
 from mmcv import Config
 import torch
 
 from mmdet3d.apis.train import train_detector
 from mmdet3d.datasets import build_dataset
 from mmdet3d.models import build_model
-
-from mmcv import print_log
 
 
 class Client():
@@ -29,6 +30,7 @@ class Client():
     def __init__(self,
                  name: str,
                  scenes:List[str],
+                 lr_cfg: dict,
                  num_epochs: int = 1,
                  token_to_name_path: Optional[str] = None,
                  seed: int = 0):
@@ -38,6 +40,7 @@ class Client():
 
         self.name = name
         self.scenes = scenes
+        self.lr_scheduler = LRScheduler(**lr_cfg)
         self.num_epochs = num_epochs
         self.token_to_name_path = token_to_name_path
         self.seed = seed
@@ -229,7 +232,8 @@ class Client():
               load_path: Union[str, Path], 
               work_root: Path,
             #   lr: float
-              lr:dict):
+            #   lr:dict
+            ):
         """ Train model on client dataset.
 
         Args:
@@ -238,6 +242,12 @@ class Client():
             save_path (Path): File path where updated weights will be stored.
             round_idx (int): How many edge aggregations rounds have been performed.
         """
+        lr = {
+            i: self.lr_scheduler.lr_at(self.total_rounds + i) 
+            for i in range(0, self.num_epochs)
+        }
+        print_log(f"Using learning rate: {lr}", logger='root')
+
         cfg = self._build_client_cfg(
             scenes = self.scenes,
             base_cfg = base_cfg,
@@ -247,7 +257,6 @@ class Client():
             lr = lr     
         )
         meta = self._init_runner_meta(cfg)
-
 
         print_log(f"[CLIENT - {self.name}] has started training")
 
@@ -282,6 +291,8 @@ class Client():
             meta = meta
         )
         print(f"Client {self.name} has finished training.")
+
+        self.total_rounds += self.num_epochs
 
         # Store weights
         self._save_model_weights(model, save_path)

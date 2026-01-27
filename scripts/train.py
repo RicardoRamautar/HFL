@@ -7,7 +7,7 @@ def main():
     print_log(f"Constructing coordinator...", logger='root' )
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_006",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
         init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth",
@@ -17,7 +17,7 @@ def main():
             'gamma': 0.95
         },
         num_local_rounds = 2,
-        num_edge_rounds = 1,
+        num_edge_rounds = 2,
         num_global_rounds = 1,
         token_to_name_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/scene_name_to_token.json",
         seed = 0
