@@ -1,0 +1,52 @@
+numpy 1.23.5
+numba 0.53.0
+[CLIENT - client_0000] has started training
+[client_0000] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0000 has finished training.
+Client client_0000 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/boston-seaport/edge_round_0/client_0000/weights.pth
+    - client_0000 finished training
+[CLIENT - client_0001] has started training
+[client_0001] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0001 has finished training.
+Client client_0001 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/boston-seaport/edge_round_0/client_0001/weights.pth
+    - client_0001 finished training
+[CLIENT - client_0390] has started training
+[client_0390] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+fusion mean: [0.09917676 0.81041294 0.09041032]
+[BTSA TEST] std_delta/std_bt = 2.069
+Client client_0390 has finished training.
+Client client_0390 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-hollandvillage/edge_round_0/client_0390/weights.pth
+    - client_0390 finished training
+[CLIENT - client_0391] has started training
+[client_0391] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0391 has finished training.
+Client client_0391 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-hollandvillage/edge_round_0/client_0391/weights.pth
+    - client_0391 finished training
+[CLIENT - client_0460] has started training
+[client_0460] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0460 has finished training.
+Client client_0460 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-onenorth/edge_round_0/client_0460/weights.pth
+    - client_0460 finished training
+[CLIENT - client_0461] has started training
+[client_0461] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0461 has finished training.
+Client client_0461 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-onenorth/edge_round_0/client_0461/weights.pth
+    - client_0461 finished training
+[CLIENT - client_0608] has started training
+[client_0608] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0608 has finished training.
+Client client_0608 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-queenstown/edge_round_0/client_0608/weights.pth
+    - client_0608 finished training
+[CLIENT - client_0609] has started training
+[client_0609] Using MMCV load_checkpoint for MMDet checkpoint: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+load checkpoint from local path: /tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth
+Client client_0609 has finished training.
+Client client_0609 stored weights at /tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_005/global_round_0/singapore-queenstown/edge_round_0/client_0609/weights.pth
+    - client_0609 finished training
