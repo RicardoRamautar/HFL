@@ -33,11 +33,11 @@ class Coordinator():
                 work_root: str,
                 base_cfg_path: str,
                 manifest_path: str,
-                init_ckpt_path: str,
                 lr_cfg: dict,
                 num_local_rounds: int = 1,
                 num_edge_rounds: int = 1,
                 num_global_rounds: int = 1,
+                init_ckpt_path: Optional[str] = None,
                 token_to_name_path: Optional[str] = None,
                 seed: int = 0):
 
