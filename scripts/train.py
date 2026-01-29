@@ -7,10 +7,12 @@ def main():
     print_log(f"Constructing coordinator...", logger='root' )
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_006",
-        base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_007",
+        # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
+        base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/standard_cmt.py",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
-        init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth",
+        # init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth",
+        init_ckpt_path = None,
         lr_cfg = {
             'policy': "exp",
             'base_lr': 1e-4,
