@@ -126,13 +126,85 @@ def client_per_log(scenes, logs, scene_tokens):
     return manifest
 
 
+def iid_day_night(num_edges, num_clients_per_edge, scenes, logs, train_scene_tokens):
+    categorized_scenes = {}
+    for log in logs:
+        location = log['location']
+        log_token = log['token']
+
+        if location not in categorized_scenes:
+            categorized_scenes[location] = {
+                'day': [],
+                'night': []
+            }
+
+        for scene in scenes:
+            if (scene['log_token'] == log_token) and (scene['token'] in train_scene_tokens):
+                description = scene['description'].lower()
+                if 'night' in description:
+                    categorized_scenes[location]['night'].append(scene)
+                else:
+                    categorized_scenes[location]['day'].append(scene)
+
+    num_clients = num_edges*num_clients_per_edge
+    client_scenes = {i: [] for i in range(num_clients)}
+
+    for location, scenes_per_cat in categorized_scenes.items():
+        for timeofday in ['day', 'night']:
+            scenes_list = scenes_per_cat[timeofday]
+            random.shuffle(scenes_list)
+
+            for i, scene in enumerate(scenes_list):
+                client_id = i % num_clients
+                client_scenes[client_id].append(scene)
+
+    clients = [i for i in range(num_clients)]
+    manifest = {"edges": {}}
+    for e in range(num_edges):
+        edge_name = f'edge_{e}'
+        manifest["edges"][edge_name] = {"clients": {}}
+
+        for _ in range(num_clients_per_edge):
+            i = random.choice(clients)
+            client_name = f'client_{i}'
+
+            scenes = [scene['name'] for scene in client_scenes[i]]
+
+            manifest["edges"][edge_name]["clients"][client_name] = {
+                "scenes": scenes
+            }
+
+            clients.remove(i)
+
+    for i, scenes in client_scenes.items():
+        rainy_scenes = 0
+        night_scenes = 0
+        day_scenes = 0
+        total_scenes = 0
+
+        for scene in scenes:
+            description = scene['description'].lower()
+            if 'rain' in description:
+                rainy_scenes += 1
+            if 'night' in description:
+                night_scenes += 1
+            if ('rain' not in description) and ('night' not in description):
+                day_scenes += 1
+
+            total_scenes += 1
+
+        print(f"Client {i}: \n   Total scenes: {total_scenes} \n   Rainy scenes: {rainy_scenes} \n   Nights: {night_scenes} \n   Days: {day_scenes}")
+
+    return manifest
+
+
 def main():
     # Paths to nuScenes metadata files
     pkl_file = "/home/rdr/Documents/master_thesis/data/nuscenes/nuscenes_infos_train.pkl"
     scene_file = Path('./scene.json')
     log_file = Path('./log.json')
 
-    output_file = Path("./data_distribution_4.json")
+    output_file = Path("./data_distribution_5.json")
 
     # Load metadata
     with open(scene_file, "r") as f:
@@ -147,11 +219,18 @@ def main():
 
     # manifest = client_per_scene(scenes, logs, data_tokens)
     # manifest = scenes_per_client(scenes, logs, data_tokens, 2)
-    manifest = client_per_log(scenes, logs, data_tokens)
+    # manifest = client_per_log(scenes, logs, data_tokens)
+    manifest = iid_day_night(
+        num_edges = 2,
+        num_clients_per_edge = 2,
+        scenes = scenes,
+        logs = logs,
+        train_scene_tokens = data_tokens
+    )
 
     store_manifest(manifest, output_file)
 
-    print_manifest(manifest)
+    print(manifest)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
