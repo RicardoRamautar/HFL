@@ -14,9 +14,6 @@ from mmdet3d.apis.train import train_detector
 from mmdet3d.datasets import build_dataset
 from mmdet3d.models import build_model
 
-# def _init_custom_modules(cfg):
-#     if cfg.get('custom_imports', None):
-#         import_modules_from_strings(**cfg.custom_imports)
 
 class Client():
     """ Client participating in federated learning.
@@ -60,8 +57,6 @@ class Client():
                           token_to_name_path: Union[str, None], 
                           seed: int,
                           lr: float):
-                        #   gpu_id: int = 0
-                        #   ):
         """ Construct client-specific config from base config.
         
         Args:
@@ -91,7 +86,6 @@ class Client():
             cfg.total_epochs = num_epochs
             cfg.runner.max_epochs = num_epochs
 
-        # cfg.gpu_ids = [gpu_id]
         cfg.gpu_ids = [0]
 
         # We set the model weights ourselves
@@ -129,14 +123,11 @@ class Client():
 
         model_to_load = model.module if hasattr(model, "module") else model
 
-        # 1) MMDet checkpoint: always use MMCV loader (handles spconv formats correctly)
         if isinstance(ckpt, dict) and "state_dict" in ckpt:
             print(f"[{self.name}] Using MMCV load_checkpoint for MMDet checkpoint: {load_path}", flush=True)
             load_checkpoint(model_to_load, str(load_path), map_location="cpu", strict=False)
             return
 
-        # 2) Raw state_dict (your FL weights): DO NOT call load_state_dict()
-        print(f"[{self.name}] Loading raw state_dict via MANUAL COPY: {load_path}", flush=True)
         state_dict = ckpt
 
         # Build name -> actual tensor reference maps
@@ -184,10 +175,7 @@ class Client():
     def train(self, 
               base_cfg: Config,
               load_path: Union[str, Path], 
-              work_root: Path,
-            #   gpu_id: int,
-            #   round_idx:int
-            ):
+              work_root: Path):
         """ Train model on client dataset.
 
         Args:
@@ -196,11 +184,7 @@ class Client():
             save_path (Path): File path where updated weights will be stored.
             round_idx (int): How many edge aggregations rounds have been performed.
         """
-        # import torch
-        # torch.cuda.set_device(gpu_id)
-
         lr = {
-            # i: self.lr_scheduler.lr_at(round_idx + i) 
             i: self.lr_scheduler.lr_at(self.total_rounds + i) 
             for i in range(0, self.num_epochs)
         }
@@ -212,8 +196,7 @@ class Client():
             num_epochs = self.num_epochs,
             token_to_name_path = self.token_to_name_path,
             seed = self.seed,
-            lr = lr,
-            # gpu_id = gpu_id
+            lr = lr
         )
         meta = self._init_runner_meta(cfg)
 
@@ -223,7 +206,6 @@ class Client():
         save_path = work_root / "weights.pth"
 
         # Construct dataset
-        # _init_custom_modules(cfg)
         dataset =  build_dataset(cfg.data.train)
         num_samples = len(dataset)
 

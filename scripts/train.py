@@ -1,11 +1,5 @@
 from hfl.coordinator import Coordinator
-
 from mmcv import print_log
-# import multiprocessing as mp
-
-# import sys
-# sys.path.insert(0, "/opt/src/code")
-
 
 def main():
     print_log(f"Constructing coordinator...", logger='root' )
@@ -33,5 +27,4 @@ def main():
     cloud.train()
 
 if __name__ == '__main__':
-    # mp.set_start_method("fork", force=True)
     main()
