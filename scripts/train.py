@@ -1,13 +1,17 @@
 from hfl.coordinator import Coordinator
 
 from mmcv import print_log
+# import multiprocessing as mp
+
+# import sys
+# sys.path.insert(0, "/opt/src/code")
 
 
 def main():
     print_log(f"Constructing coordinator...", logger='root' )
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_007",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_008",
         # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/standard_cmt.py",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
@@ -29,4 +33,5 @@ def main():
     cloud.train()
 
 if __name__ == '__main__':
+    # mp.set_start_method("fork", force=True)
     main()

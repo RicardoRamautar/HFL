@@ -9,6 +9,39 @@ from pathlib import Path
 import gc
 
 from mmcv import print_log, Config
+# import multiprocessing as mp
+
+# from itertools import islice
+# import os
+
+# def _run_client(client, base_cfg, load_path, client_root, gpu_id, rounds):
+#     # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+
+#     try:
+#         return client.train(base_cfg, load_path, client_root, gpu_id, rounds)
+#     finally:
+#         gc.collect()
+#         if torch.cuda.is_available():
+#             torch.cuda.empty_cache()
+
+# # def _wrapped_worker(client, base_cfg, load_path, edge_root_str, gpu_id, rounds, results):
+# #     client_root = Path(edge_root_str) / client.name
+# #     client_root.mkdir(parents=True, exist_ok=True)
+
+# #     save_path, num_samples = _run_client(
+# #         client, base_cfg, load_path, client_root, gpu_id, rounds
+# #     )
+# #     results.append((save_path, num_samples))
+
+# def _wrapped_worker(client, base_cfg, load_path, edge_root_str, gpu_id, rounds, result_queue):
+#     client_root = Path(edge_root_str) / client.name
+#     client_root.mkdir(parents=True, exist_ok=True)
+
+#     save_path, num_samples = _run_client(
+#         client, base_cfg, load_path, client_root, gpu_id, rounds
+#     )
+#     # Send result back to parent (safe IPC)
+#     result_queue.put((client.name, str(save_path), int(num_samples)))
 
 
 class Edge():
@@ -54,6 +87,7 @@ class Edge():
 
         # Create clients
         self.clients = []
+        # self.client_rounds = {}
         for client_name, client_info in clients.items():
             print_log(f"Instantiating client {client_name}", logger='root')
             client = Client(
@@ -65,6 +99,8 @@ class Edge():
                 seed = seed
             )
             self.clients.append(client)
+
+            # self.client_rounds[client_name] = 0
 
 
     def _single_iter(self, load_path: Union[str, Path], edge_root: Path):
@@ -96,6 +132,111 @@ class Edge():
 
         return weight_paths, sample_counts
 
+    # def _single_iter(self, load_path: Union[str, Path], edge_root: Path):
+    #     weight_paths = []
+    #     sample_counts = []
+
+    #     num_gpus = 2
+    #     gpu_ids = [0, 1]
+
+    #     clients = list(self.clients)
+
+    #     # Process clients in batches of size = num_gpus
+    #     for batch_start in range(0, len(clients), num_gpus):
+    #         batch = clients[batch_start : batch_start + num_gpus]
+
+    #         processes = []
+    #         manager = mp.Manager()
+    #         results = manager.list()
+
+    #         def _wrapped(client, gpu_id):
+    #             client_root = edge_root / client.name
+    #             client_root.mkdir(parents=True, exist_ok=True)
+    #             save_path, num_samples = _run_client(
+    #                 client, self.base_cfg, load_path, client_root, gpu_id
+    #             )
+    #             results.append((save_path, num_samples))
+
+    #         # Launch up to 2 clients in parallel
+    #         for client, gpu_id in zip(batch, gpu_ids):
+    #             p = mp.Process(target=_wrapped, args=(client, gpu_id))
+    #             p.start()
+    #             processes.append(p)
+
+    #         # Wait for this batch to finish
+    #         for p in processes:
+    #             p.join()
+    #             if p.exitcode != 0:
+    #                 raise RuntimeError("Client training process crashed")
+
+    #         # Collect results from this batch
+    #         for save_path, num_samples in results:
+    #             weight_paths.append(save_path)
+    #             sample_counts.append(num_samples)
+
+    #     self.round += 1
+    #     return weight_paths, sample_counts
+
+
+    # def _single_iter(self, load_path: Union[str, Path], edge_root: Path):
+    #     weight_paths = []
+    #     sample_counts = []
+
+    #     num_gpus = 2
+    #     gpu_ids = [0, 1]
+    #     clients = list(self.clients[:2])
+
+    #     # manager = mp.Manager()
+    #     # results = manager.list()
+    #     result_queue = mp.Queue()
+
+    #     # def _wrapped(client, gpu_id):
+    #     #     client_root = edge_root / client.name
+    #     #     client_root.mkdir(parents=True, exist_ok=True)
+    #     #     save_path, num_samples = _run_client(
+    #     #         client, self.base_cfg, load_path, client_root, gpu_id
+    #     #     )
+    #     #     results.append((save_path, num_samples))
+
+    #     # Process clients in batches of size = num_gpus
+    #     for batch_start in range(0, len(clients), num_gpus):
+    #         batch = clients[batch_start: batch_start + num_gpus]
+    #         processes = []
+
+    #         # for client, gpu_id in zip(batch, gpu_ids):
+    #         #     p = mp.Process(target=_wrapped, args=(client, gpu_id))
+    #         #     p.start()
+    #         #     processes.append(p)
+    #         for client, gpu_id in zip(batch, gpu_ids):
+    #             rounds = self.client_rounds[client.name]
+    #             p = mp.Process(
+    #                 target=_wrapped_worker,
+    #                 args=(client, self.base_cfg, load_path, str(edge_root), gpu_id, rounds, result_queue)
+    #             )
+    #             p.start()
+    #             processes.append(p)
+    #             # pending_updates.append(client.name)
+    #             self.client_rounds[client.name] += self.num_local_rounds
+
+    #         for p in processes:
+    #             p.join()
+    #             if p.exitcode != 0:
+    #                 raise RuntimeError("Client training process crashed")
+
+    #         # for name in pending_updates:
+    #         #     self.client_rounds[name] += self.num_local_rounds
+
+    #     # for save_path, num_samples in results:
+    #     #     weight_paths.append(save_path)
+    #     #     sample_counts.append(num_samples)
+    #     for _ in range(len(batch)):
+    #         client_name, save_path_str, num_samples = result_queue.get()
+    #         weight_paths.append(Path(save_path_str))
+    #         sample_counts.append(num_samples)
+    #         self.client_rounds[client_name] += self.num_local_rounds
+
+    #     self.round += 1
+    #     return weight_paths, sample_counts
 
 
     def train(self, 

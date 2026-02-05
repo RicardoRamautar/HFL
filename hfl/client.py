@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 from pathlib import Path
 import copy
 
+from mmcv.utils import import_modules_from_strings
 from mmcv.runner import load_checkpoint
 from mmcv import print_log
 from mmcv import Config
@@ -13,6 +14,9 @@ from mmdet3d.apis.train import train_detector
 from mmdet3d.datasets import build_dataset
 from mmdet3d.models import build_model
 
+# def _init_custom_modules(cfg):
+#     if cfg.get('custom_imports', None):
+#         import_modules_from_strings(**cfg.custom_imports)
 
 class Client():
     """ Client participating in federated learning.
@@ -56,6 +60,8 @@ class Client():
                           token_to_name_path: Union[str, None], 
                           seed: int,
                           lr: float):
+                        #   gpu_id: int = 0
+                        #   ):
         """ Construct client-specific config from base config.
         
         Args:
@@ -85,6 +91,7 @@ class Client():
             cfg.total_epochs = num_epochs
             cfg.runner.max_epochs = num_epochs
 
+        # cfg.gpu_ids = [gpu_id]
         cfg.gpu_ids = [0]
 
         # We set the model weights ourselves
@@ -94,10 +101,10 @@ class Client():
         cfg.lr_config = None
         cfg.momentum_config = None
         # cfg.optimizer.lr = lr
-        cfg.custom_hooks = {
+        cfg.custom_hooks = [{
             'type':'PerEpochLr',
             'epoch_lrs':lr
-        }
+        }]
 
         return cfg
 
@@ -177,7 +184,9 @@ class Client():
     def train(self, 
               base_cfg: Config,
               load_path: Union[str, Path], 
-              work_root: Path
+              work_root: Path,
+            #   gpu_id: int,
+            #   round_idx:int
             ):
         """ Train model on client dataset.
 
@@ -187,7 +196,11 @@ class Client():
             save_path (Path): File path where updated weights will be stored.
             round_idx (int): How many edge aggregations rounds have been performed.
         """
+        # import torch
+        # torch.cuda.set_device(gpu_id)
+
         lr = {
+            # i: self.lr_scheduler.lr_at(round_idx + i) 
             i: self.lr_scheduler.lr_at(self.total_rounds + i) 
             for i in range(0, self.num_epochs)
         }
@@ -199,7 +212,8 @@ class Client():
             num_epochs = self.num_epochs,
             token_to_name_path = self.token_to_name_path,
             seed = self.seed,
-            lr = lr     
+            lr = lr,
+            # gpu_id = gpu_id
         )
         meta = self._init_runner_meta(cfg)
 
@@ -209,6 +223,7 @@ class Client():
         save_path = work_root / "weights.pth"
 
         # Construct dataset
+        # _init_custom_modules(cfg)
         dataset =  build_dataset(cfg.data.train)
         num_samples = len(dataset)
 
