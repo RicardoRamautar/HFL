@@ -5,20 +5,29 @@ def main():
     print_log(f"Constructing coordinator...", logger='root' )
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_008",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_0114",
         # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
-        base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/standard_cmt.py",
+        # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/standard_cmt.py",
+        base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
         # init_ckpt_path = "/tudelft.net/staff-umbrella/rdramautar/CMT-BTSA/experiments/experiments_13/best_pts_bbox_NuScenes/mAP_epoch_4.pth",
         init_ckpt_path = None,
-        lr_cfg = {
-            'policy': "exp",
-            'base_lr': 1e-4,
-            'gamma': 0.95
-        },
         num_local_rounds = 2,
         num_edge_rounds = 2,
-        num_global_rounds = 1,
+        num_global_rounds = 2,
+        # lr_cfg = {
+        #     'policy': "exp",
+        #     'total_epochs': num_local_rounds*num_edge_rounds*num_global_rounds,
+        #     'base_lr': 1e-4,
+        #     'gamma': 0.95
+        # },
+        lr_cfg = {
+            'policy': "cyclic",
+            'total_epochs': 2*2*2,
+            'initial_lr': 0.0001,
+            'min_lr': 0.0001*0.0001,
+            'max_lr': 0.0001*6
+        },
         token_to_name_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/scene_name_to_token.json",
         seed = 0
     )

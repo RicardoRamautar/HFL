@@ -49,6 +49,7 @@ class Edge():
         self.num_local_rounds = num_local_rounds
 
         self.round = 0
+        # self.training_results = {}
 
         # Create clients
         self.clients = []
@@ -69,14 +70,15 @@ class Edge():
     def _single_iter(self, load_path: Union[str, Path], edge_root: Path):
         weight_paths = []
         sample_counts = []
-
+        client_results = []
         for client in self.clients[:2]:
             client_root = edge_root / str(client.name)
             client_root.mkdir(parents=True, exist_ok=True)
 
             try:
                 # save_path, num_samples = client.train(self.base_cfg, load_path, client_root, lr)
-                save_path, num_samples = client.train(self.base_cfg, load_path, client_root)
+                # save_path, num_samples = client.train(self.base_cfg, load_path, client_root)
+                save_path, num_samples, training_results = client.train(self.base_cfg, load_path, client_root)
             finally:
                 # Free Python objects and cached GPU memory in between clients
                 gc.collect()
@@ -84,12 +86,15 @@ class Edge():
                     torch.cuda.empty_cache()
             print(f"    - {client.name} finished training")
 
+            client_results.append(training_results)
+
             weight_paths.append(save_path)
             sample_counts.append(num_samples)
 
         self.round += 1
 
-        return weight_paths, sample_counts
+        # return weight_paths, sample_counts
+        return weight_paths, sample_counts, client_results
 
 
     def train(self, 
@@ -103,6 +108,7 @@ class Edge():
                 be stored.
         """
         total_samples = 0
+        training_results = []
         for i in range(self.num_rounds):
             print_log(f"[[EDGE - {self.name}] - Round {i}", logger='root' )
             # Create folder for i-th edge training round
@@ -111,7 +117,11 @@ class Edge():
             edge_root.mkdir(parents=True, exist_ok=True)
 
             # Train across all clients
-            weight_paths, sample_counts = self._single_iter(load_path, edge_root)
+            # weight_paths, sample_counts = self._single_iter(load_path, edge_root)
+            weight_paths, sample_counts, client_results = self._single_iter(load_path, edge_root)
+
+            edge_results = {"edge_round": i, "clients": client_results}
+            training_results.append(edge_results)
             
             # Aggregate client weights
             avg_weights = average_weights(weight_paths, sample_counts)
@@ -121,6 +131,9 @@ class Edge():
             save_state_dict(avg_weights, edge_path)
             load_path = edge_path
 
-        return edge_path, total_samples
+        global_edge_results = {"id": self.name, "edge_rounds": training_results}
+
+        # return edge_path, total_samples
+        return edge_path, total_samples, global_edge_results
 
 

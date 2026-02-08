@@ -8,6 +8,10 @@ import json
 from mmcv import print_log
 from mmcv import Config
 
+def write_json(path: Path, data: dict):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
 
 class Coordinator():
     """ Cloud server coordinating the federated training.
@@ -51,8 +55,16 @@ class Coordinator():
         self.work_root = Path(work_root)
         self.work_root.mkdir(parents=True, exist_ok=True)
 
+        self.results_path = self.work_root / f"results.json"
+
         self.init_ckpt_path = init_ckpt_path
         self.num_global_rounds = num_global_rounds
+
+        # self.results["global_rounds"] = []
+        self.results = {
+            "global_rounds": []
+        }
+
 
         with open(manifest_path, "r") as f:
             self.manifest = json.load(f)
@@ -64,6 +76,12 @@ class Coordinator():
 
         base_cfg = Config.fromfile(base_cfg_path)
         print_log(f"Created base config file", logger='root' )
+
+        # # Total number of client training epochs across complete federated training
+        # # Necessary for some learning rate schedules
+        # total_client_epochs = num_local_rounds * \
+        #                       num_edge_rounds * \
+        #                       num_global_rounds
 
         # Create edge servers
         self.edges = []
@@ -85,20 +103,26 @@ class Coordinator():
     def _single_iter(self, load_path: Union[str, Path], global_root):
         weight_paths = []
         sample_counts = []
+        edge_results = []
         for edge in self.edges:
             edge_root = global_root / str(edge.name)
             edge_root.mkdir(parents=True, exist_ok=True)
 
-            save_path, num_samples = edge.train(load_path, edge_root)
+            # save_path, num_samples = edge.train(load_path, edge_root)
+            save_path, num_samples, train_results = edge.train(load_path, edge_root)
+
+            edge_results.append(train_results)
 
             weight_paths.append(save_path)
             sample_counts.append(num_samples)
 
-        return weight_paths, sample_counts
+        # return weight_paths, sample_counts
+        return weight_paths, sample_counts, edge_results
 
 
     def train(self):
         load_path = self.init_ckpt_path
+        # global_results = []
         for i in range(self.num_global_rounds):
             print_log(f"[CLOUD] - Round {i}", logger='root' )
             global_root = self.work_root / f"global_round_{i}"
@@ -106,7 +130,11 @@ class Coordinator():
             global_root.mkdir(parents=True, exist_ok=True)
 
             # Train across all edges
-            weight_paths, sample_counts = self._single_iter(load_path, global_root)
+            # weight_paths, sample_counts = self._single_iter(load_path, global_root)
+            weight_paths, sample_counts, train_results = self._single_iter(load_path, global_root)
+
+            edge_results = {"global_round": i, "edges": train_results}
+            self.results["global_rounds"].append(edge_results)
 
             # Aggregate edge weights
             avg_weights = average_weights(weight_paths, sample_counts)
@@ -114,3 +142,8 @@ class Coordinator():
             # Store aggregated weights
             save_state_dict(avg_weights, global_path)
             load_path = global_path
+
+            write_json(self.results_path, self.results)
+
+
+
