@@ -71,7 +71,8 @@ class Edge():
         weight_paths = []
         sample_counts = []
         client_results = []
-        for client in self.clients[:2]:
+        # for client in self.clients[:2]:
+        for client in self.clients:
             client_root = edge_root / str(client.name)
             client_root.mkdir(parents=True, exist_ok=True)
 

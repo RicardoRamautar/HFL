@@ -3,7 +3,7 @@ custom_imports = dict(
         'projects.mmdet3d_plugin.models.detectors.cmt',
         'mmdet3d_plugin.hooks.cyclic_lr_per_iter',
         'mmdet3d_plugin.hooks.store_hfl_metrics',
-        'HFL.datasets.nuscenes_dataset'
+        # 'HFL.datasets.nuscenes_dataset'
     ],
     allow_failed_imports=False
 )
@@ -19,8 +19,13 @@ class_names = [
 voxel_size = [0.075, 0.075, 0.2]
 out_size_factor = 8
 
-evaluation = None
-dataset_type = 'HFLNuScenesDataset'
+evaluation = dict(
+    interval=1,
+    metric='bbox',
+    save_best='pts_bbox_NuScenes/mAP',
+    rule='greater'
+)
+dataset_type = 'CustomNuScenesDataset'
 
 data_root = '/opt/src/mmdetection3d/data/nuscenes/'
 pkl_root = '/tudelft.net/staff-umbrella/rdramautar/datasets/nuscenes_infos/'
@@ -69,37 +74,37 @@ train_pipeline = [
                     'transformation_3d_flow', 'rot_degree',
                     'gt_bboxes_3d', 'gt_labels_3d'))
 ]
-# test_pipeline = [
-#     dict(
-#         type='LoadPointsFromFile',
-#         coord_type='LIDAR',
-#         load_dim=5,
-#         use_dim=[0, 1, 2, 3, 4],
-#     ),
-#     dict(
-#         type='LoadPointsFromMultiSweeps',
-#         sweeps_num=10,
-#         use_dim=[0, 1, 2, 3, 4],
-#     ),
-#     dict(
-#         type='MultiScaleFlipAug3D',
-#         img_scale=(1333, 800),
-#         pts_scale_ratio=1,
-#         flip=False,
-#         transforms=[
-#             dict(
-#                 type='GlobalRotScaleTrans',
-#                 rot_range=[0, 0],
-#                 scale_ratio_range=[1.0, 1.0],
-#                 translation_std=[0, 0, 0]),
-#             dict(type='RandomFlip3D'),
-#             dict(
-#                 type='DefaultFormatBundle3D',
-#                 class_names=class_names,
-#                 with_label=False),
-#             dict(type='Collect3D', keys=['points'])
-#         ])
-# ]
+test_pipeline = [
+    dict(
+        type='LoadPointsFromFile',
+        coord_type='LIDAR',
+        load_dim=5,
+        use_dim=[0, 1, 2, 3, 4],
+    ),
+    dict(
+        type='LoadPointsFromMultiSweeps',
+        sweeps_num=10,
+        use_dim=[0, 1, 2, 3, 4],
+    ),
+    dict(
+        type='MultiScaleFlipAug3D',
+        img_scale=(1333, 800),
+        pts_scale_ratio=1,
+        flip=False,
+        transforms=[
+            dict(
+                type='GlobalRotScaleTrans',
+                rot_range=[0, 0],
+                scale_ratio_range=[1.0, 1.0],
+                translation_std=[0, 0, 0]),
+            dict(type='RandomFlip3D'),
+            dict(
+                type='DefaultFormatBundle3D',
+                class_names=class_names,
+                with_label=False),
+            dict(type='Collect3D', keys=['points'])
+        ])
+]
 data = dict(
     samples_per_gpu=4,
     workers_per_gpu=6,
@@ -113,26 +118,26 @@ data = dict(
         modality=input_modality,
         test_mode=False,
         box_type_3d='LiDAR'),
-    # val=dict(
-    #     type=dataset_type,
-    #     data_root=data_root,
-    #     ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
-    #     load_interval=1,
-    #     pipeline=test_pipeline,
-    #     classes=class_names,
-    #     modality=input_modality,
-    #     test_mode=True,
-    #     box_type_3d='LiDAR'),
-    # test=dict(
-    #     type=dataset_type,
-    #     data_root=data_root,
-    #     ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
-    #     load_interval=1,
-    #     pipeline=test_pipeline,
-    #     classes=class_names,
-    #     modality=input_modality,
-    #     test_mode=True,
-    #     box_type_3d='LiDAR')
+    val=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
+        load_interval=1,
+        pipeline=test_pipeline,
+        classes=class_names,
+        modality=input_modality,
+        test_mode=True,
+        box_type_3d='LiDAR'),
+    test=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
+        load_interval=1,
+        pipeline=test_pipeline,
+        classes=class_names,
+        modality=input_modality,
+        test_mode=True,
+        box_type_3d='LiDAR')
 )
 model = dict(
     type='CmtDetector',
@@ -278,7 +283,7 @@ momentum_config = dict(
 total_epochs = 15
 checkpoint_config = None
 log_config = dict(
-    interval=50,
+    interval=4,
     hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
@@ -291,9 +296,4 @@ workflow = [('train', 1)]
 gpu_ids = range(0, 8)
 
 runner = dict(type='EpochBasedRunner', max_epochs=total_epochs)
-# lr_config = dict(
-#     policy='cyclic',
-#     target_ratio=(6, 0.0001),
-#     cyclic_times=1,
-#     step_ratio_up=0.4)
 custom_hooks = None

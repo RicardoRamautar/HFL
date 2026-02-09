@@ -41,7 +41,7 @@ class LRScheduler():
         curr_iter = self.offset * self.iters_per_epoch + iteration
         lr = self.policy.lr_at(curr_iter)
 
-        print_log(f"[LRScheduler] learning rate at iteration {curr_iter} set to: {lr}", logger='root' )
+        # print_log(f"[LRScheduler] learning rate at iteration {curr_iter} set to: {lr}", logger='root' )
 
         return curr_iter, lr
 
