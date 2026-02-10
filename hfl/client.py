@@ -75,11 +75,12 @@ class Client():
         cfg = copy.deepcopy(base_cfg)
 
         # Overwrite client-specific information
-        cfg.data.train.enable_hfl = True
-        cfg.data.train.scenes = scenes
+        cfg.data.train.dataset.enable_hfl = True
+        # cfg.data.train.scenes = scenes
+        cfg.data.train.dataset.scenes = scenes
 
         if token_to_name_path is not None:
-            cfg.data.train.scene_translation = token_to_name_path
+            cfg.data.train.dataset.scene_translation = token_to_name_path
         cfg.evaluation = None
         cfg.checkpoint_config = None
         cfg.seed = seed
