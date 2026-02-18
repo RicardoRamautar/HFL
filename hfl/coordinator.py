@@ -205,6 +205,8 @@ class Coordinator():
 
 
     def validate(self, weights_path):
+        print_log(f"validating weights located at {weights_path}", logger='root' )
+
         cfg = copy.deepcopy(self.val_cfg)
         dataset = build_dataset(cfg.data.val)
 

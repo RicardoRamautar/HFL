@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Union
+import warnings
 import torch
 
 from mmcv import print_log
@@ -22,12 +23,19 @@ def average_weights(weight_paths, sample_counts):
         f"Cannot average over a non-positive number of training samples."
 
     avg_weights = None
+    prev_ckpt_keys = None
     for path, samples in zip(weight_paths, sample_counts):
         # Load state dict or ckpts
         ckpt = torch.load(str(path), map_location="cpu")
         state_dict = ckpt["state_dict"] if isinstance(ckpt, dict) and "state_dict" in ckpt else ckpt
 
         w = samples / total_samples
+
+        ckpt_keys = set(ckpt.keys())
+        if prev_ckpt_keys is not None:
+            if ckpt_keys != prev_ckpt_keys:
+                warnings.warn("Mismatching keys between state dicts that are being averaged")
+        prev_ckpt_keys = ckpt_keys
 
         if avg_weights is None:
             avg_weights = {k: v * w for k, v in state_dict.items()}
