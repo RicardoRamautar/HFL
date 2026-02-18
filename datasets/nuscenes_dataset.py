@@ -33,23 +33,25 @@ class HFLNuScenesDataset(NuScenesDataset):
         super(HFLNuScenesDataset, self).__init__(*args, **kwargs)
         self.return_gt_info = return_gt_info
 
-        if scenes is None:
-            raise ValueError(f"No scenes specified.")
-        if scene_translation is None:
-            raise ValueError(f"No file provided to translate scene tokens to scene names")
+        if enable_hfl:
+            if scenes is None:
+                raise ValueError(f"No scenes specified.")
+            if scene_translation is None:
+                raise ValueError(f"No file provided to translate scene tokens to scene names")
 
-        with open(scene_translation, "r") as f:
-            token_to_name = json.load(f)
+            with open(scene_translation, "r") as f:
+                token_to_name = json.load(f)
 
-        # Convert to set for faster look-up
-        scenes = set(scenes)
-        org_len = len(self.data_infos)
-        self.data_infos = [
-            info for info in self.data_infos
-            if token_to_name.get(info["scene_token"]) in scenes
-        ]
+            # Convert to set for faster look-up
+            scenes = set(scenes)
+            # org_len = len(self.data_infos)
+            self.data_infos = [
+                info for info in self.data_infos
+                if token_to_name.get(info["scene_token"]) in scenes
+            ]
 
-        if self.filter_empty_gt:
+        # if self.filter_empty_gt:
+        if self.filter_empty_gt and (not self.test_mode):
             def has_gt(info):
                 gt_names = info.get('gt_names', None)
                 return gt_names is not None and len(gt_names) > 0
@@ -58,10 +60,11 @@ class HFLNuScenesDataset(NuScenesDataset):
             self.data_infos = [info for info in self.data_infos if has_gt(info)]
             after = len(self.data_infos)
 
-            print_log(
-                f">>> Filtered empty-GT samples: {before} -> {after}",
-                logger='root'
-            )
+            if before != after:
+                print_log(
+                    f">>> Filtered empty-GT samples: {before} -> {after}",
+                    logger='root'
+                )
 
         if len(self.data_infos) == 0:
             raise ValueError(f"No samples are available for "
