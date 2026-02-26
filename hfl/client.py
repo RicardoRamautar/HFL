@@ -35,7 +35,8 @@ class Client():
                  lr_cfg: dict,
                  num_epochs: int = 1,
                  token_to_name_path: Optional[str] = None,
-                 seed: int = 0):
+                 seed: int = 0, 
+                 resume_from: int = 0):
 
         if num_epochs <= 0:
             raise ValueError(f"Number of training epochs must be a positive integer.")
@@ -48,7 +49,9 @@ class Client():
         self.token_to_name_path = token_to_name_path
         self.seed = seed
         self.num_samples = 0
-        self.total_rounds = 0
+        self.total_rounds = resume_from
+
+        self.lr_cfg['offset'] = self.total_rounds
 
 
     def _build_client_cfg(self, 

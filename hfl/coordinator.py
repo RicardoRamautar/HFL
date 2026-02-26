@@ -54,7 +54,8 @@ class Coordinator():
                 num_global_rounds: int = 1,
                 init_ckpt_path: Optional[str] = None,
                 token_to_name_path: Optional[str] = None,
-                seed: int = 0):
+                seed: int = 0,
+                resume_from: int = 0):
 
         if num_local_rounds <= 0: 
             raise ValueError("num_local_rounds must be a positive integer")
@@ -66,15 +67,21 @@ class Coordinator():
         self.work_root = Path(work_root)
         self.work_root.mkdir(parents=True, exist_ok=True)
 
+        self.resume_from = resume_from
+
         self.results_path = self.work_root / f"results.json"
 
         self.init_ckpt_path = init_ckpt_path
         self.num_global_rounds = num_global_rounds
 
         # self.results["global_rounds"] = []
-        self.results = {
-            "global_rounds": []
-        }
+        if self.resume_from == 0:
+            self.results = {
+                "global_rounds": []
+            }
+        else:
+            with open(self.results_path, "r") as f:
+                self.results = json.load(f)
 
         with open(manifest_path, "r") as f:
             self.manifest = json.load(f)
@@ -94,6 +101,9 @@ class Coordinator():
         #                       num_edge_rounds * \
         #                       num_global_rounds
 
+        # From which epoch clients should resume from
+        resume_from_clients = (self.resume_from+1)*num_edge_rounds*num_local_rounds
+
         # Create edge servers
         self.edges = []
         for edge_name, edge_data in edges.items():
@@ -106,7 +116,8 @@ class Coordinator():
                 num_local_rounds = num_local_rounds,
                 token_to_name_path = token_to_name_path,
                 seed = seed,
-                lr_cfg = lr_cfg
+                lr_cfg = lr_cfg,
+                resume_from = resume_from_clients
             )
             self.edges.append(edge)
 
@@ -178,9 +189,13 @@ class Coordinator():
 
 
     def train(self):
-        load_path = self.init_ckpt_path
+        if self.resume_from == 0:
+            load_path = self.init_ckpt_path
+        else:
+            load_path = self.work_root / f"global_round_{self.resume_from}" / "global_weights.pth"
+
         # global_results = []
-        for i in range(self.num_global_rounds):
+        for i in range(self.resume_from+1, self.num_global_rounds):
             print_log(f"[CLOUD] - Round {i}", logger='root' )
             global_root = self.work_root / f"global_round_{i}"
             global_path = global_root / "global_weights.pth"

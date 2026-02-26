@@ -36,7 +36,8 @@ class Edge():
                  num_rounds: int = 1,
                  num_local_rounds: int = 1,
                  token_to_name_path: Optional[str] = None,
-                 seed: int = 0):
+                 seed: int = 0,
+                 resume_from: int = 0):
 
         if num_rounds <= 0: 
             raise ValueError("num_rounds must be a positive integer")
@@ -62,7 +63,8 @@ class Edge():
                 lr_cfg = lr_cfg,
                 num_epochs = self.num_local_rounds,
                 token_to_name_path = token_to_name_path,
-                seed = seed
+                seed = seed,
+                resume_from = resume_from
             )
             self.clients.append(client)
 

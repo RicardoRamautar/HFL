@@ -37,7 +37,8 @@ def main():
             'max_lr': 5*base_lr
         },
         token_to_name_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/scene_name_to_token.json",
-        seed = 0
+        seed = 0,
+        resume_from = 10        # Latest fully complete global round
     )
     print_log(f"Coordinator constructed. Starting training...", logger='root' )
 
