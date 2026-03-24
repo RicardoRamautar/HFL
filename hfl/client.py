@@ -60,7 +60,6 @@ class Client():
                           num_epochs: int, 
                           token_to_name_path: Union[str, None], 
                           seed: int,
-                        #   lr: float
                           ):
         """ Construct client-specific config from base config.
         
@@ -77,9 +76,9 @@ class Client():
         """
         cfg = copy.deepcopy(base_cfg)
 
-        # Overwrite client-specific information
         # cfg.data.train.enable_hfl = True
         cfg.data.train.dataset.enable_hfl = True
+
         # cfg.data.train.scenes = scenes
         cfg.data.train.dataset.scenes = scenes
 
@@ -102,11 +101,7 @@ class Client():
 
         cfg.lr_config = None
         cfg.momentum_config = None
-        # cfg.optimizer.lr = lr
-        # cfg.custom_hooks = [{
-        #     'type':'CyclicLrPerIter',
-        #     'lr_cfg': copy.deepcopy(self.lr_cfg)
-        # }]
+
         cfg.custom_hooks = [
             {
                 'type':'CyclicLrPerIter',
@@ -203,11 +198,7 @@ class Client():
             save_path (Path): File path where updated weights will be stored.
             round_idx (int): How many edge aggregations rounds have been performed.
         """
-        # lr = {
-        #     i: self.lr_scheduler.lr_at(self.total_rounds + i) 
-        #     for i in range(0, self.num_epochs)
-        # }
-        # print_log(f"Using learning rate: {lr}", logger='root')
+        print_log(f"[CLIENT - {self.name}] has started training")
 
         cfg = self._build_client_cfg(
             scenes = self.scenes,
@@ -215,11 +206,8 @@ class Client():
             num_epochs = self.num_epochs,
             token_to_name_path = self.token_to_name_path,
             seed = self.seed,
-            # lr = lr
         )
         meta = self._init_runner_meta(cfg)
-
-        print_log(f"[CLIENT - {self.name}] has started training")
 
         cfg.work_dir = str(work_root)
         save_path = work_root / "weights.pth"
@@ -252,7 +240,6 @@ class Client():
             validate=False,
             meta = meta
         )
-        print(f"Client {self.name} has finished training.")
 
         self.total_rounds += self.num_epochs
         # self.lr_scheduler.set_offset(self.total_rounds)
@@ -264,6 +251,5 @@ class Client():
         training_results = {"id": self.name, "num_samples": num_samples, "training_results": meta['train_metrics']}
         
         print(f"Client {self.name} stored weights at {str(save_path)}")
-        # return save_path, num_samples
         return save_path, num_samples, training_results
 

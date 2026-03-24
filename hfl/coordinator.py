@@ -74,7 +74,6 @@ class Coordinator():
         self.init_ckpt_path = init_ckpt_path
         self.num_global_rounds = num_global_rounds
 
-        # self.results["global_rounds"] = []
         if self.resume_from == 0:
             self.results = {
                 "global_rounds": []
@@ -88,20 +87,11 @@ class Coordinator():
         with open(manifest_path, "r") as f:
             self.manifest = json.load(f)
         
-        print_log(f"Read manifest", logger='root' )
-
         # List of keys describing edges
         edges = self.manifest["edges"]
 
         base_cfg = Config.fromfile(base_cfg_path)
         self.val_cfg = Config.fromfile(val_cfg_path)
-        print_log(f"Created base config file", logger='root' )
-
-        # # Total number of client training epochs across complete federated training
-        # # Necessary for some learning rate schedules
-        # total_client_epochs = num_local_rounds * \
-        #                       num_edge_rounds * \
-        #                       num_global_rounds
 
         # From which epoch clients should resume from
         resume_from_clients = self.start_from*num_edge_rounds*num_local_rounds
@@ -109,7 +99,6 @@ class Coordinator():
         # Create edge servers
         self.edges = []
         for edge_name, edge_data in edges.items():
-            print_log(f"Instantiating Edge server {edge_name}", logger='root' )
             edge = Edge(
                 name = edge_name,
                 clients = edge_data["clients"],
@@ -178,7 +167,6 @@ class Coordinator():
             edge_root = global_root / str(edge.name)
             edge_root.mkdir(parents=True, exist_ok=True)
 
-            # save_path, num_samples = edge.train(load_path, edge_root)
             save_path, num_samples, train_results = edge.train(load_path, edge_root)
 
             edge_results.append(train_results)
@@ -186,7 +174,6 @@ class Coordinator():
             weight_paths.append(save_path)
             sample_counts.append(num_samples)
 
-        # return weight_paths, sample_counts
         return weight_paths, sample_counts, edge_results
 
 
@@ -198,12 +185,13 @@ class Coordinator():
 
         for i in range(self.start_from, self.num_global_rounds):
             print_log(f"[CLOUD] - Round {i}", logger='root' )
+
             global_root = self.work_root / f"global_round_{i}"
-            global_path = global_root / "global_weights.pth"
             global_root.mkdir(parents=True, exist_ok=True)
 
+            global_path = global_root / "global_weights.pth"
+
             # Train across all edges
-            # weight_paths, sample_counts = self._single_iter(load_path, global_root)
             weight_paths, sample_counts, train_results = self._single_iter(load_path, global_root)
 
             # Aggregate edge weights

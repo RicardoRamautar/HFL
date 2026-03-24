@@ -12,10 +12,7 @@ def main():
 
     cloud = Coordinator(
         work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_031",
-        # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_epoch_lr.py",
-        # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/standard_cmt.py",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
-        # val_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr_val.py",
         val_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         # manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
         manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/iid_day_night_2edges_4clients.json",
