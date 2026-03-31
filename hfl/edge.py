@@ -61,7 +61,7 @@ class Edge():
                 num_epochs = self.num_local_rounds,
                 token_to_name_path = token_to_name_path,
                 seed = seed,
-                resume_from = resume_from
+                offset = resume_from
             )
             self.clients.append(client)
 
