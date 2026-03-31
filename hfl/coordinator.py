@@ -3,8 +3,10 @@ from hfl.edge import Edge
 
 from typing import Optional, Union
 from pathlib import Path
+import warnings
 import json
 import copy
+import os
 
 import torch
 from mmdet3d.datasets import build_dataset
@@ -55,7 +57,7 @@ class Coordinator():
                 init_ckpt_path: Optional[str] = None,
                 token_to_name_path: Optional[str] = None,
                 seed: int = 0,
-                resume_from: int = 0):
+                resume_from: Optional[int] = None):
 
         if num_local_rounds <= 0: 
             raise ValueError("num_local_rounds must be a positive integer")
@@ -74,15 +76,40 @@ class Coordinator():
         self.init_ckpt_path = init_ckpt_path
         self.num_global_rounds = num_global_rounds
 
-        if self.resume_from == 0:
+        # if self.resume_from == 0:
+        #     self.results = {
+        #         "global_rounds": []
+        #     }
+        #     self.start_from = 0
+        # elif not os.path.exists(self.results_path):
+        #     warnings.warn(f"Resuming from global round {resume_from}, but {self.results_path} doesn't exist yet, so creating one from scratch")
+        #     self.results = {
+        #         "global_rounds": []
+        #     }
+        #     self.start_from = self.resume_from + 1
+        # else:
+        #     with open(self.results_path, "r") as f:
+        #         self.results = json.load(f)
+        #     self.start_from = self.resume_from + 1
+
+        if self.resume_from is None:
             self.results = {
                 "global_rounds": []
             }
             self.start_from = 0
         else:
-            with open(self.results_path, "r") as f:
-                self.results = json.load(f)
-            self.start_from = self.resume_from + 1
+            assert isinstance(self.resume_from, int), f"Argument 'resume_from' should be None or of type int, but is of type {type(self.resume_from)}"
+
+            if not os.path.exists(self.results_path) and self.resume_from == 0:
+                warnings.warn(f"Resuming from global round {resume_from}, but {self.results_path} doesn't exist yet, so creating one from scratch")
+                self.results = {
+                    "global_rounds": []
+                }
+                self.start_from = self.resume_from + 1
+            else:
+                with open(self.results_path, "r") as f:
+                    self.results = json.load(f)
+                self.start_from = self.resume_from + 1
 
         with open(manifest_path, "r") as f:
             self.manifest = json.load(f)
@@ -166,7 +193,7 @@ class Coordinator():
 
 
     def train(self):
-        if self.resume_from == 0:
+        if self.resume_from is None:
             load_path = self.init_ckpt_path
         else:
             load_path = self.work_root / f"global_round_{self.resume_from}" / "global_weights.pth"
@@ -219,8 +246,8 @@ class Coordinator():
         model.CLASSES = dataset.CLASSES
         self._load_model_weights(model, weights_path)
         
-        model.eval()
         model = MMDataParallel(model, device_ids=[0])
+        model.eval()
 
         with torch.no_grad():
             outputs = single_gpu_test(model, data_loader)
