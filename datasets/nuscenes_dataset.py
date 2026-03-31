@@ -44,7 +44,7 @@ class HFLNuScenesDataset(NuScenesDataset):
 
             # Convert to set for faster look-up
             scenes = set(scenes)
-            # org_len = len(self.data_infos)
+
             self.data_infos = [
                 info for info in self.data_infos
                 if token_to_name.get(info["scene_token"]) in scenes
@@ -121,8 +121,12 @@ class HFLNuScenesDataset(NuScenesDataset):
             cam_intrinsics = []
             img_timestamp = []
             for cam_type, cam_info in info['cams'].items():
+                img_path = cam_info['data_path']
+                if not osp.isabs(img_path):
+                    image_path = osp.join(self.data_root, img_path)
+                image_paths.append(image_path)
+
                 img_timestamp.append(cam_info['timestamp'] / 1e6)
-                image_paths.append(cam_info['data_path'])
                 # obtain lidar to image transformation matrix
                 lidar2cam_r = np.linalg.inv(cam_info['sensor2lidar_rotation'])
                 lidar2cam_t = cam_info[
