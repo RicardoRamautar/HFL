@@ -43,13 +43,11 @@ class Client():
 
         self.name = name
         self.scenes = scenes
-        # self.lr_scheduler = LRScheduler(**lr_cfg)
         self.lr_cfg = copy.deepcopy(lr_cfg)
         self.num_epochs = num_epochs
         self.token_to_name_path = token_to_name_path
         self.seed = seed
         self.num_samples = 0
-        self.total_rounds = resume_from
 
         self.offset = offset
         self.lr_cfg['offset'] = self.offset
@@ -140,7 +138,7 @@ class Client():
 
         if isinstance(ckpt, dict) and "state_dict" in ckpt:
             print(f"[{self.name}] Using MMCV load_checkpoint for MMDet checkpoint: {load_path}", flush=True)
-            load_checkpoint(model_to_load, str(load_path), map_location="cpu", strict=False)
+            load_checkpoint(model_to_load, str(load_path), map_location="cpu", strict=True)
             return
 
         state_dict = ckpt
@@ -149,34 +147,38 @@ class Client():
         name_to_param = dict(model_to_load.named_parameters())
         name_to_buf = dict(model_to_load.named_buffers())
 
-        loaded = 0
-        skipped = 0
-        shape_mismatch = 0
+        # loaded = 0
+        # skipped = 0
+        # shape_mismatch = 0
 
         for k, v in state_dict.items():
-            target = None
+            # target = None
             if k in name_to_param:
                 target = name_to_param[k]
             elif k in name_to_buf:
                 target = name_to_buf[k]
+            else:
+                assert False, f'Parameter {k} from ckpt state_dict does not exist in loaded model'
 
-            if target is None:
-                skipped += 1
-                continue
+            assert target.shape == v.shape, f"Shape mismatch for {k}: ckpt={tuple(v.shape)} model={tuple(target.shape)}"
 
-            if target.shape != v.shape:
-                shape_mismatch += 1
-                # print first few mismatches only
-                if shape_mismatch <= 5:
-                    print(f"[{self.name}] SHAPE MISMATCH {k}: ckpt={tuple(v.shape)} model={tuple(target.shape)}", flush=True)
-                continue
+            # if target is None:
+            #     skipped += 1
+            #     continue
+
+            # if target.shape != v.shape:
+            #     shape_mismatch += 1
+            #     # print first few mismatches only
+            #     if shape_mismatch <= 5:
+            #         print(f"[{self.name}] SHAPE MISMATCH {k}: ckpt={tuple(v.shape)} model={tuple(target.shape)}", flush=True)
+            #     continue
 
             # Copy weights WITHOUT triggering module-specific load logic
             target.data.copy_(v)
-            loaded += 1
+            # loaded += 1
 
-        print(f"[{self.name}] Manual load complete. loaded={loaded} skipped_missing={skipped} skipped_shape={shape_mismatch}", flush=True)
-
+        # print(f"[{self.name}] Manual load complete. loaded={loaded} skipped_missing={skipped} skipped_shape={shape_mismatch}", flush=True)
+        print(f"Successfully loaded weights from '{load_path}'", flush=True)
 
 
     def _save_model_weights(self, model, save_path: Union[str, Path]):
