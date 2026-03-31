@@ -1,3 +1,14 @@
+custom_imports = dict(
+    imports=[
+        'projects.mmdet3d_plugin.models.detectors.cmt',
+        'projects.mmdet3d_plugin.datasets.pipelines.loading',
+        'mmdet3d_plugin.hooks.cyclic_lr_per_iter',
+        'mmdet3d_plugin.hooks.store_hfl_metrics',
+        'HFL.datasets.nuscenes_dataset'
+    ],
+    allow_failed_imports=False
+)
+
 plugin=True
 plugin_dir='projects/mmdet3d_plugin/'
 
@@ -8,9 +19,19 @@ class_names = [
 ]
 voxel_size = [0.1, 0.1, 0.2]
 out_size_factor = 8
-evaluation = dict(interval=20)
-dataset_type = 'CustomNuScenesDataset'
-data_root = 'data/nuscenes/'
+
+evaluation = dict(
+    interval=1,
+    metric='bbox',
+    save_best='pts_bbox_NuScenes/mAP',
+    rule='greater'
+)
+
+dataset_type = 'HFLNuScenesDataset'
+
+data_root = '/opt/src/mmdetection3d/data/nuscenes/'
+pkl_root = '/tudelft.net/staff-umbrella/rdramautar/datasets/nuscenes_infos/new/'
+
 input_modality = dict(
     use_lidar=True,
     use_camera=True,
@@ -33,17 +54,17 @@ ida_aug_conf = {
 
 train_pipeline = [
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromFile',
         coord_type='LIDAR',
         load_dim=5,
         use_dim=[0, 1, 2, 3, 4],
     ),
     dict(
-        type='LoadPointsFromMultiSweeps',
+        type='CustomLoadPointsFromMultiSweeps',
         sweeps_num=10,
         use_dim=[0, 1, 2, 3, 4],
     ),
-    dict(type='LoadMultiViewImageFromFiles'),
+    dict(type='CustomLoadMultiViewImageFromFiles'),
     dict(type='LoadAnnotations3D', with_bbox_3d=True, with_label_3d=True),
     dict(
         type='UnifiedObjectSample',
@@ -51,8 +72,8 @@ train_pipeline = [
         mixup_rate=0.5,
         db_sampler=dict(
             type='UnifiedDataBaseSampler',
-            data_root=None,
-            info_path=data_root + 'nuscenes_dbinfos_train.pkl',
+            data_root='/tudelft.net/staff-umbrella/rdramautar/datasets/nuscenes_infos/new/',
+            info_path=pkl_root + 'CustomNuScenesDataset_dbinfos_train.pkl',
             rate=1.0,
             prepare=dict(
                 filter_by_difficulty=[-1],
@@ -80,7 +101,7 @@ train_pipeline = [
                 pedestrian=2,
                 traffic_cone=2),
             points_loader=dict(
-                type='LoadPointsFromFile',
+                type='CustomLoadPointsFromFile',
                 coord_type='LIDAR',
                 load_dim=5,
                 use_dim=[0, 1, 2, 3, 4],
@@ -116,17 +137,17 @@ train_pipeline = [
 ]
 test_pipeline = [
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromFile',
         coord_type='LIDAR',
         load_dim=5,
         use_dim=[0, 1, 2, 3, 4],
     ),
     dict(
-        type='LoadPointsFromMultiSweeps',
+        type='CustomLoadPointsFromMultiSweeps',
         sweeps_num=10,
         use_dim=[0, 1, 2, 3, 4],
     ),
-    dict(type='LoadMultiViewImageFromFiles'),
+    dict(type='CustomLoadMultiViewImageFromFiles'),
     dict(
         type='MultiScaleFlipAug3D',
         img_scale=(1333, 800),
@@ -150,14 +171,14 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=6,
+    samples_per_gpu=8,
+    workers_per_gpu=8,
     train=dict(
         type='CBGSDataset',
         dataset=dict(
             type=dataset_type,
             data_root=data_root,
-            ann_file=data_root + '/nuscenes_infos_train.pkl',
+            ann_file=pkl_root + 'nuscenes_infos_train_2.pkl',
             load_interval=1,
             pipeline=train_pipeline,
             classes=class_names,
@@ -167,22 +188,24 @@ data = dict(
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=data_root + '/nuscenes_infos_val.pkl',
+        ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
         load_interval=1,
         pipeline=test_pipeline,
         classes=class_names,
         modality=input_modality,
         test_mode=True,
+        enable_hfl=False,
         box_type_3d='LiDAR'),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=data_root + '/nuscenes_infos_val.pkl',
+        ann_file=pkl_root + 'nuscenes_infos_val_2.pkl',
         load_interval=1,
         pipeline=test_pipeline,
         classes=class_names,
         modality=input_modality,
         test_mode=True,
+        enable_hfl=False,
         box_type_3d='LiDAR'))
 model = dict(
     type='CmtDetector',
@@ -345,26 +368,30 @@ optimizer_config = dict(
     grad_clip=dict(max_norm=35, norm_type=2),
     custom_fp16=dict(pts_voxel_encoder=False, pts_middle_encoder=False, pts_bbox_head=False))
 
-lr_config = dict(
-    policy='cyclic',
-    target_ratio=(6, 0.0001),
-    cyclic_times=1,
-    step_ratio_up=0.4)
+# lr_config = dict(
+#     policy='cyclic',
+#     target_ratio=(6, 0.0001),
+#     cyclic_times=1,
+#     step_ratio_up=0.4)
 momentum_config = dict(
     policy='cyclic',
     target_ratio=(0.8947368421052632, 1),
     cyclic_times=1,
     step_ratio_up=0.4)
 total_epochs = 20
-checkpoint_config = dict(interval=1)
+checkpoint_config = None
 log_config = dict(
-    interval=50,
-    hooks=[dict(type='TextLoggerHook'),
-           dict(type='TensorboardLoggerHook')])
+    interval=100,
+    hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
+
 work_dir = None
-load_from='ckpts/nuim_r50.pth'
+load_from = None
 resume_from = None
+
 workflow = [('train', 1)]
 gpu_ids = range(0, 8)
+
+runner = dict(type='EpochBasedRunner', max_epochs=total_epochs)
+custom_hooks = None

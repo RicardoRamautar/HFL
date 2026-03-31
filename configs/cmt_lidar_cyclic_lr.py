@@ -47,7 +47,8 @@ train_pipeline = [
         use_dim=[0, 1, 2, 3, 4],
     ),
     dict(
-        type='LoadPointsFromMultiSweeps',
+        # type='LoadPointsFromMultiSweeps',
+        type='CustomLoadPointsFromMultiSweeps',
         sweeps_num=10,
         use_dim=[0, 1, 2, 3, 4],
     ),
@@ -124,7 +125,8 @@ test_pipeline = [
         use_dim=[0, 1, 2, 3, 4],
     ),
     dict(
-        type='LoadPointsFromMultiSweeps',
+        # type='LoadPointsFromMultiSweeps',
+        type='CustomLoadPointsFromMultiSweeps',
         sweeps_num=10,
         use_dim=[0, 1, 2, 3, 4],
     ),
