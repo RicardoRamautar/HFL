@@ -13,14 +13,14 @@ def main():
     num_global_rounds = 10
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_033",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_034",
         # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         # val_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_fusion.py",
         val_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_fusion.py",
         # manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/dataset_distribution.json",
         # manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/iid_day_night_2edges_4clients.json",
-        manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/iid_night_rain_025.json",
+        manifest_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/non_iid_025.json",
         init_ckpt_path = None,
         num_local_rounds = num_local_rounds,
         num_edge_rounds = num_edge_rounds,
@@ -42,7 +42,7 @@ def main():
         },
         token_to_name_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/data/scene_name_to_token.json",
         seed = 0,
-        resume_from = 4        # Latest fully complete global round
+        resume_from = 6        # Latest fully complete global round
     )
     print_log(f"Coordinator constructed. Starting training...", logger='root' )
 
