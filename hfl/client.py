@@ -217,7 +217,13 @@ class Client():
 
         # Construct dataset
         dataset =  build_dataset(cfg.data.train)
-        num_samples = len(dataset)
+
+        if hasattr(dataset, 'dataset'):
+            base_dataset = dataset.dataset  # unwrap CBGSDataset
+        else:
+            base_dataset = dataset
+        num_samples = len(base_dataset)
+        # num_samples = len(dataset)
 
         # Build model
         model = build_model(
