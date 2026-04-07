@@ -41,6 +41,7 @@ def average_weights(weight_paths, sample_counts):
             avg_weights = {k: v * w for k, v in state_dict.items()}
         else:
             for k in avg_weights:
+                assert (avg_weights[k].shape == state_dict[k].shape), f'Shape mismatch between averaged weights'
                 avg_weights[k] += state_dict[k] * w
 
     return avg_weights
