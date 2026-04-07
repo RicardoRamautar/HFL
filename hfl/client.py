@@ -147,10 +147,6 @@ class Client():
         name_to_param = dict(model_to_load.named_parameters())
         name_to_buf = dict(model_to_load.named_buffers())
 
-        # loaded = 0
-        # skipped = 0
-        # shape_mismatch = 0
-
         for k, v in state_dict.items():
             # target = None
             if k in name_to_param:
@@ -162,22 +158,9 @@ class Client():
 
             assert target.shape == v.shape, f"Shape mismatch for {k}: ckpt={tuple(v.shape)} model={tuple(target.shape)}"
 
-            # if target is None:
-            #     skipped += 1
-            #     continue
-
-            # if target.shape != v.shape:
-            #     shape_mismatch += 1
-            #     # print first few mismatches only
-            #     if shape_mismatch <= 5:
-            #         print(f"[{self.name}] SHAPE MISMATCH {k}: ckpt={tuple(v.shape)} model={tuple(target.shape)}", flush=True)
-            #     continue
-
             # Copy weights WITHOUT triggering module-specific load logic
             target.data.copy_(v)
-            # loaded += 1
 
-        # print(f"[{self.name}] Manual load complete. loaded={loaded} skipped_missing={skipped} skipped_shape={shape_mismatch}", flush=True)
         print(f"Successfully loaded weights from '{load_path}'", flush=True)
 
 
