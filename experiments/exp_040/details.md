@@ -1,0 +1,1 @@
+In this experiment, we trained CMT on a small iid dataset in a centralized manner in order to compare it to single-client HFL where the client has the same scenes (`exp_041`)
