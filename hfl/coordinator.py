@@ -57,7 +57,8 @@ class Coordinator():
                 init_ckpt_path: Optional[str] = None,
                 token_to_name_path: Optional[str] = None,
                 seed: int = 0,
-                resume_from: Optional[int] = None):
+                resume_from: Optional[int] = None,
+                val_interval: int = 1):
 
         if num_local_rounds <= 0: 
             raise ValueError("num_local_rounds must be a positive integer")
@@ -70,6 +71,7 @@ class Coordinator():
         self.work_root.mkdir(parents=True, exist_ok=True)
 
         self.resume_from = resume_from
+        self.val_interval = val_interval
 
         self.results_path = self.work_root / f"results.json"
 
@@ -216,7 +218,11 @@ class Coordinator():
             save_state_dict(avg_weights, global_path)
             load_path = global_path
 
-            val_results = self.validate(global_path)
+            if (i % self.val_interval == 0) or (i == self.num_global_rounds-1):
+                val_results = self.validate(global_path)
+            else:
+                val_results = {}
+
             edge_results = {"global_round": i, "edges": train_results, "val_results": val_results}
             self.results["global_rounds"].append(edge_results)
 
