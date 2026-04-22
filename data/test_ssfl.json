@@ -1,0 +1,38 @@
+{
+    "singapore": {
+        "clients": {
+            "client_0": [
+                "scene-0004",
+                "scene-0005"
+            ],
+            "client_1": [
+                "scene-0130",
+                "scene-0131"    
+            ]
+        },
+        "scenes": [
+            "scene-0435",
+            "scene-0439",
+            "scene-0864",
+            "scene-0866"
+        ]
+    },
+    "boston": {
+        "clients": {
+            "client_2": [
+                "scene-0584",
+                "scene-0585"    
+            ],
+            "client_3": [
+                "scene-0440",
+                "scene-0441"    
+            ]
+        },
+        "scenes": [
+            "scene-0262",
+            "scene-0263",
+            "scene-0212",
+            "scene-0213"
+        ]
+    }
+}
