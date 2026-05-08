@@ -7,11 +7,11 @@ def main():
     # base_lr = 0.0001 / 4
     base_lr = 0.00014 / 2
     num_local_rounds = 1
-    num_edge_rounds = 2
-    num_global_rounds = 20
+    num_edge_rounds = 4
+    num_global_rounds = 10
 
     cloud = Coordinator(
-        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_039",
+        work_root = "/tudelft.net/staff-umbrella/rdramautar/HFL/experiments/exp_047",
         # base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         # val_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_lidar_cyclic_lr.py",
         base_cfg_path = "/tudelft.net/staff-umbrella/rdramautar/HFL/configs/cmt_fusion.py",
